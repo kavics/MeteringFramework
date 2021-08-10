@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29509.3
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeteringFramework", "MeteringFramework\MeteringFramework.csproj", "{E18D6570-32EF-4F59-935E-8BBB792A5921}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeteringDemo", "MeteringDemo\MeteringDemo.csproj", "{92E42012-4406-48BE-A49A-7EE709EEC375}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E18D6570-32EF-4F59-935E-8BBB792A5921}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E18D6570-32EF-4F59-935E-8BBB792A5921}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E18D6570-32EF-4F59-935E-8BBB792A5921}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E18D6570-32EF-4F59-935E-8BBB792A5921}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92E42012-4406-48BE-A49A-7EE709EEC375}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92E42012-4406-48BE-A49A-7EE709EEC375}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92E42012-4406-48BE-A49A-7EE709EEC375}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92E42012-4406-48BE-A49A-7EE709EEC375}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5139EEC3-A6D6-4769-B5E9-747333CD3EBD}
+	EndGlobalSection
+EndGlobal
