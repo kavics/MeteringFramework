@@ -11,7 +11,7 @@ namespace MeteringDemo
         {
             await Measurement1();
             Console.WriteLine("------------------------------------------------");
-            await Measurement2(false);
+            await Measurement2();
             Console.WriteLine("------------------------------------------------");
             await Measurement3();
             Console.WriteLine("------------------------------------------------");
@@ -43,7 +43,7 @@ namespace MeteringDemo
             Console.WriteLine($"  long:  {result[3].AverageTime:hh\\:mm\\:ss\\.ffff}  {result[3].Percent:F2}");
         }
 
-        private static async Task Measurement2(bool parallel)
+        private static async Task Measurement2()
         {
             var a = int.MinValue;
             var b = long.MinValue;
@@ -55,8 +55,7 @@ namespace MeteringDemo
                 racer2: () => { b++; },
                 turns: 10,
                 count: 10000000,
-                progress: p => { Console.Write(p.Message); Console.Write("     \r"); },
-                parallel
+                progress: p => { Console.Write(p.Message); Console.Write("     \r"); }
             ).RunAsync().ConfigureAwait(false);
 
             Console.Write("                                                     \r");
