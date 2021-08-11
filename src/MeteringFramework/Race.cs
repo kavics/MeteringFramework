@@ -6,35 +6,61 @@ using System.Threading.Tasks;
 
 namespace MeteringFramework
 {
+    public enum GcUsage
+    {
+        None,
+        GarbagePerTurn,
+        GarbagePerIteration
+    }
+
     public class Race
     {
         private readonly Action[] _racers;
         private readonly int _turns;
         private readonly int _count;
         private readonly Action<Progress> _progress;
+        private readonly GcUsage _gcUsage;
 
         private long[][] _times; // [racer][turn]
 
-        public Race(Action[] racers, int turns, int count, Action<Progress> progress)
+        public Race(Action[] racers, int turns, int count, Action<Progress> progress, GcUsage gcUsage = GcUsage.None)
         {
             _racers = racers;
             _turns = turns;
             _count = count;
             _progress = progress;
+            _gcUsage = gcUsage;
         }
 
-        public virtual Task<RaceResult[]> RunAsync(CancellationToken cancellationToken = default)
+        public async Task<RaceResult[]> RunAsync(CancellationToken cancel = default)
         {
             _progress(new Progress("Initializing."));
             _times = new long[_racers.Length][];
             for (int i = 0; i < _racers.Length; i++)
                 _times[i] = new long[_turns];
 
+            GC.Collect();
+            switch (_gcUsage)
+            {
+                case GcUsage.None: await RunNoGcAsync(cancel); break;
+                case GcUsage.GarbagePerTurn: await RunGarbagePerTurnAsync(cancel); break;
+                case GcUsage.GarbagePerIteration: await RunGarbagePerIterationAsync(cancel); break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            _progress(new Progress($"Race finished. Calculating result."));
+
+            var totalTime = _times.Select(x => x.Sum()).Sum();
+            return _times.Select(x => CreateResult(x, totalTime)).ToArray();
+        }
+        private Task RunNoGcAsync(CancellationToken cancellationToken = default)
+        {
             for (int turn = 0; turn < _turns; turn++)
             {
                 for (int racer = 0; racer < _racers.Length; racer++)
                 {
-                    if(cancellationToken != default)
+                    if (cancellationToken != default)
                         cancellationToken.ThrowIfCancellationRequested();
 
                     // Atomic measuring
@@ -47,11 +73,52 @@ namespace MeteringFramework
                     _times[racer][turn] = stopwatch.ElapsedTicks;
                 }
             }
+            return Task.CompletedTask;
+        }
+        private Task RunGarbagePerTurnAsync(CancellationToken cancellationToken = default)
+        {
+            for (int turn = 0; turn < _turns; turn++)
+            {
+                for (int racer = 0; racer < _racers.Length; racer++)
+                {
+                    if (cancellationToken != default)
+                        cancellationToken.ThrowIfCancellationRequested();
 
-            _progress(new Progress($"Race finished. Calculating result."));
+                    // Atomic measuring
+                    AggregatedProgress($"Turn {turn + 1}/{_turns}, racer {racer + 1}");
+                    var stopwatch = Stopwatch.StartNew();
+                    for (int i = 0; i < _count; i++)
+                    {
+                        _racers[racer]();
+                    }
+                    _times[racer][turn] = stopwatch.ElapsedTicks;
 
-            var totalTime = _times.Select(x => x.Sum()).Sum();
-            return Task.FromResult(_times.Select(x => CreateResult(x, totalTime)).ToArray());
+                    GC.Collect();
+                }
+            }
+            return Task.CompletedTask;
+        }
+        private Task RunGarbagePerIterationAsync(CancellationToken cancellationToken = default)
+        {
+            for (int turn = 0; turn < _turns; turn++)
+            {
+                for (int racer = 0; racer < _racers.Length; racer++)
+                {
+                    if (cancellationToken != default)
+                        cancellationToken.ThrowIfCancellationRequested();
+
+                    // Atomic measuring
+                    AggregatedProgress($"Turn {turn + 1}/{_turns}, racer {racer + 1}");
+                    var stopwatch = Stopwatch.StartNew();
+                    for (int i = 0; i < _count; i++)
+                    {
+                        _racers[racer]();
+                        GC.Collect();
+                    }
+                    _times[racer][turn] = stopwatch.ElapsedTicks;
+                }
+            }
+            return Task.CompletedTask;
         }
 
         private DateTime _lastAggregatedProgress = DateTime.MinValue;
