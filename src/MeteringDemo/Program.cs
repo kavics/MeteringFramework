@@ -9,13 +9,15 @@ namespace MeteringDemo
     {
         static async Task Main(string[] args)
         {
-            await Measurement1();
-            Console.WriteLine("------------------------------------------------");
-            await Measurement2(false);
-            Console.WriteLine("------------------------------------------------");
-            await Measurement3();
-            Console.WriteLine("------------------------------------------------");
-            await Measurement4();
+            //await Measurement1();
+            //Console.WriteLine("------------------------------------------------");
+            //await Measurement2();
+            //Console.WriteLine("------------------------------------------------");
+            //await Measurement3();
+            //Console.WriteLine("------------------------------------------------");
+            await Measurement4(GcUsage.None);
+            Console.WriteLine("----------------------------");
+            await Measurement4(GcUsage.GarbagePerTurn);
         }
 
         private static async Task Measurement1()
@@ -43,7 +45,7 @@ namespace MeteringDemo
             Console.WriteLine($"  long:  {result[3].AverageTime:hh\\:mm\\:ss\\.ffff}  {result[3].Percent:F2}");
         }
 
-        private static async Task Measurement2(bool parallel)
+        private static async Task Measurement2()
         {
             var a = int.MinValue;
             var b = long.MinValue;
@@ -55,8 +57,7 @@ namespace MeteringDemo
                 racer2: () => { b++; },
                 turns: 10,
                 count: 10000000,
-                progress: p => { Console.Write(p.Message); Console.Write("     \r"); },
-                parallel
+                progress: p => { Console.Write(p.Message); Console.Write("     \r"); }
             ).RunAsync().ConfigureAwait(false);
 
             Console.Write("                                                     \r");
@@ -109,7 +110,7 @@ namespace MeteringDemo
             public override int B(int x) { return x++; }
         }
 
-        private static async Task Measurement4()
+        private static async Task Measurement4(GcUsage gcUsage)
         {
             var a = new string('a', 256);
             var b = new string('b', 256);
@@ -117,7 +118,8 @@ namespace MeteringDemo
             var d = new string('d', 256);
             string s1, s2, s3, s4, s5;
 
-            Console.WriteLine("String concatenation times:");
+            var gcMessage = gcUsage == GcUsage.None ? "" : " (" + gcUsage + ")";
+            Console.WriteLine($"String concatenation times{gcMessage}:");
 
             var result = await new Race(
                 racers: new Action[]
@@ -135,7 +137,8 @@ namespace MeteringDemo
                 },
                 turns: 10,
                 count: 100000,
-                progress: p => { Console.Write(p.Message); Console.Write("     \r"); }
+                progress: p => { Console.Write(p.Message); Console.Write("     \r"); },
+                gcUsage: gcUsage
             ).RunAsync().ConfigureAwait(false);
 
             Console.Write("                                                     \r");
