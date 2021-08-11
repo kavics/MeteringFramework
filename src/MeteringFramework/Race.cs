@@ -134,6 +134,10 @@ namespace MeteringFramework
         private RaceResult CreateResult(long[] times, long totalTime)
         {
             var percent = (times.Sum() * 100.0d) / (totalTime * 1.0d);
+
+            if (times.Length > 5)
+                times = times.Except(new[] { times.Min(), times.Max() }).ToArray();
+
             return new RaceResult
             {
                 MinTime = new TimeSpan(times.Min()),
